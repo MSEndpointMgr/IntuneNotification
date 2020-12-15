@@ -1,0 +1,52 @@
+{
+    "FrameworkSettings": {
+        "ApplicationID": "MSEndpointMgr.Notification",
+        "ApplicationDisplayName": "MSEndpointMgr Notification",
+        "ApplicationShowInSettings": 0,
+        "ApplicationIconUri": "",
+        "TaskPathFolderName": "Notifications"
+    },
+    "FrameworkUpdateSettings": {
+        "UpdateInterval": "Daily",
+        "UpdateFrequency": 1,
+        "UpdateTime": "10:00AM"
+    },
+    "NotificationModules": [
+        {
+            "Name": "Welcome",
+            "Type": "ActiveSetup",
+            "ConfigurationFile": "welcome.json",
+            "ScriptFile": "New-NotificationWelcome.ps1",
+            "StoraceAccountName": "scconfigmgrappdata",
+            "ContainerName": "intune-notification-welcome"
+        },
+        {
+            "Name": "ComputerRestart",
+            "Type": "ScheduledTask",
+            "TaskSettings": {
+                "TaskName": "Computer Restart",
+                "Triggers": [
+                    {
+                        "TriggerType": "Interval",
+                        "TriggerInterval": "Daily",
+                        "TriggerFrequency": 1,
+                        "TriggerTime": "10:00AM"
+                    },
+                    {
+                        "TriggerType": "Interval",
+                        "TriggerInterval": "Hourly",
+                        "TriggerFrequency": 1
+                    },
+                    {
+                        "TriggerType": "Event",
+                        "TriggerInterval": "OnLogon"
+                    }
+                ]
+            },
+            "ConfigurationFile": "restart.json",
+            "ScriptFile": "New-NotificationComputerRestart.ps1",
+            "StoraceAccountName": "scconfigmgrappdata",
+            "ContainerName": "intune-notification-restart"
+        }
+    ]
+}

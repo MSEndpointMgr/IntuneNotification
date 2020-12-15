@@ -1,0 +1,10 @@
+{
+    "NotificationSettings": {
+        "Heading": "Welcome to MSEndpointMgr.com",
+        "Description": "Device provisioning completed",
+        "PrimaryContent": "Your device is now ready to be used. Personal files in OneDrive will momentarily appear once initial synchronization has completed.",
+        "SecondaryContent": "Reach out to your local support team in case of any problems.",
+        "HeroImage": "HeroImage.png",
+        "LogoImage": "LogoImage.png"
+    }
+}
