@@ -35,11 +35,17 @@ param(
 )
 Begin {}
 Process {
-    # Set ProgressCount for ShowProgress
-    if ($PSBoundParameters["ShowProgress"]) {
-        $ProgressCount = 0
+    # Functions
+
+    function Remove-NotificationScheduledTask {
+
     }
 
-    # Main code part goes here
-    
+    function New-NotificationActiveSetupKey {
+
+    }
+
+    function Remove-NotificationActiveSetupKey {
+
+    }
 }

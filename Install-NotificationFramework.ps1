@@ -260,42 +260,42 @@ Process {
 
     function New-NotificationScheduledTask {
         param(
-            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = "Specify the scheduled task should be based on an interval trigger.")]
             [parameter(Mandatory = $true, ParameterSetName = "Daily")]
             [parameter(Mandatory = $true, ParameterSetName = "Hourly")]
             [parameter(Mandatory = $true, ParameterSetName = "Minutes")]
             [switch]$Interval,
     
-            [parameter(Mandatory = $true, ParameterSetName = "Event", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Event", HelpMessage = "Specify the scheduled task should be based on an event trigger.")]
             [switch]$Event,
     
-            [parameter(Mandatory = $true, ParameterSetName = "Daily", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Daily", HelpMessage = "Specify the interval trigger type as daily.")]
             [switch]$Daily,
     
-            [parameter(Mandatory = $true, ParameterSetName = "Hourly", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Hourly", HelpMessage = "Specify the interval trigger type as hourly.")]
             [switch]$Hourly,
     
-            [parameter(Mandatory = $true, ParameterSetName = "Minutes", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Minutes", HelpMessage = "Specify the interval trigger type as minutes.")]
             [switch]$Minutes,
     
-            [parameter(Mandatory = $true, ParameterSetName = "Event", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Event", HelpMessage = "Specify the event based trigger type.")]
             [ValidateNotNullOrEmpty()]
             [ValidateSet("AtWorkstationUnlock", "AtLogon", "AtStartup")]
             [string[]]$Trigger,
     
-            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = "Set the interval trigger frequency.")]
             [parameter(Mandatory = $true, ParameterSetName = "Daily")]
             [parameter(Mandatory = $true, ParameterSetName = "Hourly")]
             [parameter(Mandatory = $true, ParameterSetName = "Minutes")]
             [ValidateNotNullOrEmpty()]
             [int]$Frequency,
     
-            [parameter(Mandatory = $false, ParameterSetName = "Interval", HelpMessage = ".")]
+            [parameter(Mandatory = $false, ParameterSetName = "Interval", HelpMessage = "Set the start time of the interval trigger, only required when daily interval is used.")]
             [parameter(Mandatory = $true, ParameterSetName = "Daily")]
             [ValidateNotNullOrEmpty()]
             [datetime]$Time,
     
-            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = "Specify the name of the scheduled task.")]
             [parameter(Mandatory = $true, ParameterSetName = "Daily")]
             [parameter(Mandatory = $true, ParameterSetName = "Hourly")]
             [parameter(Mandatory = $true, ParameterSetName = "Minutes")]
@@ -303,7 +303,7 @@ Process {
             [ValidateNotNullOrEmpty()]
             [string]$Name,
 
-            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = "Specify the path of the scheduled task, e.g. '\' when using the root path.")]
             [parameter(Mandatory = $true, ParameterSetName = "Daily")]
             [parameter(Mandatory = $true, ParameterSetName = "Hourly")]
             [parameter(Mandatory = $true, ParameterSetName = "Minutes")]
@@ -311,7 +311,7 @@ Process {
             [ValidateNotNullOrEmpty()]
             [string]$Path,
     
-            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = "Specify the process name of the action the scheduled task triggers.")]
             [parameter(Mandatory = $true, ParameterSetName = "Daily")]
             [parameter(Mandatory = $true, ParameterSetName = "Hourly")]
             [parameter(Mandatory = $true, ParameterSetName = "Minutes")]
@@ -319,7 +319,7 @@ Process {
             [ValidateNotNullOrEmpty()]
             [string]$ProcessName,
     
-            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = "Specify arguments for the process triggered by the action.")]
             [parameter(Mandatory = $true, ParameterSetName = "Daily")]
             [parameter(Mandatory = $true, ParameterSetName = "Hourly")]
             [parameter(Mandatory = $true, ParameterSetName = "Minutes")]
@@ -327,14 +327,22 @@ Process {
             [ValidateNotNullOrEmpty()]
             [string]$Arguments,
     
-            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = ".")]
+            [parameter(Mandatory = $true, ParameterSetName = "Interval", HelpMessage = "Specify whether the scheduled task will run in System or User context.")]
             [parameter(Mandatory = $true, ParameterSetName = "Daily")]
             [parameter(Mandatory = $true, ParameterSetName = "Hourly")]
             [parameter(Mandatory = $true, ParameterSetName = "Minutes")]
             [parameter(Mandatory = $true, ParameterSetName = "Event")]
             [ValidateNotNullOrEmpty()]
             [ValidateSet("System", "User")]
-            [string]$Principal
+            [string]$Principal,
+
+            [parameter(Mandatory = $false, ParameterSetName = "Interval", HelpMessage = "Specify whether a random delay of the scheduled task trigger should occurr.")]
+            [parameter(Mandatory = $false, ParameterSetName = "Daily")]
+            [parameter(Mandatory = $false, ParameterSetName = "Hourly")]
+            [parameter(Mandatory = $false, ParameterSetName = "Minutes")]
+            [parameter(Mandatory = $false, ParameterSetName = "Event")]
+            [ValidateNotNullOrEmpty()]
+            [int]$RandomDelayInMinutes
         )
         Process {
             try {
@@ -358,13 +366,37 @@ Process {
                     # Construct the scheduled task trigger for interval selection
                     switch ($PSCmdlet.ParameterSetName) {
                         "Daily" {
-                            $TaskTrigger = New-ScheduledTaskTrigger -At $Time -Daily -DaysInterval $Frequency
+                            $TaskTriggerArgs = @{
+                                "At" = $Time
+                                "Daily" = $true
+                                "DaysInterval" = $Frequency
+                            }
+                            if ($PSBoundParameters["RandomDelayInMinutes"]) {
+                                $TaskTriggerArgs.Add("RandomDelay", (New-TimeSpan -Minutes $RandomDelayInMinutes))
+                            }
+                            $TaskTrigger = New-ScheduledTaskTrigger @TaskTriggerArgs
                         }
                         "Hourly" {
-                            $TaskTrigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInter (New-TimeSpan -Hours $Frequency)
+                            $TaskTriggerArgs = @{
+                                "Once" = $true
+                                "At" = $Time
+                                "RepetitionInterval" = (New-TimeSpan -Hours $Frequency)
+                            }
+                            if ($PSBoundParameters["RandomDelayInMinutes"]) {
+                                $TaskTriggerArgs.Add("RandomDelay", (New-TimeSpan -Minutes $RandomDelayInMinutes))
+                            }
+                            $TaskTrigger = New-ScheduledTaskTrigger @TaskTriggerArgs
                         }
                         "Minutes" {
-                            $TaskTrigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInter (New-TimeSpan -Minutes $Frequency)
+                            $TaskTriggerArgs = @{
+                                "Once" = $true
+                                "At" = $Time
+                                "RepetitionInterval" = (New-TimeSpan -Minutes $Frequency)
+                            }
+                            if ($PSBoundParameters["RandomDelayInMinutes"]) {
+                                $TaskTriggerArgs.Add("RandomDelay", (New-TimeSpan -Minutes $RandomDelayInMinutes))
+                            }
+                            $TaskTrigger = New-ScheduledTaskTrigger @TaskTriggerArgs
                         }
                     }
     
@@ -408,15 +440,7 @@ Process {
         }
     }
 
-    function Remove-NotificationScheduledTask {
-
-    }
-
     function New-NotificationActiveSetupKey {
-
-    }
-
-    function Remove-NotificationActiveSetupKey {
 
     }
 
@@ -482,6 +506,13 @@ Process {
                             # Registed scheduled task for Update-NotificationFramework script
                             Write-LogEntry -Value "Attempting to register scheduled task for notification framework update operations" -Severity 1
                             New-NotificationScheduledTask @NotificationFrameworkUpdateTaskArgs
+
+
+                            #
+                            # Update task function with support for 'OnNetworkChange-ish'
+                            # 
+                            # Add config.json property for SASKey to support that as an auth method for container if not anonymous is used
+                            #
 
 
                             ## Validate modules....

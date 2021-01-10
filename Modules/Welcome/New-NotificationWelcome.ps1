@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Create a new Ericsson welcome notification.
+    Create a new welcome notification.
 
 .DESCRIPTION
-    Create a new Ericsson welcome notification.
+    Create a new welcome notification.
 
 .EXAMPLE
     .\New-WelcomeNotification.ps1
@@ -79,9 +79,9 @@ Process {
         }
     }
 
-    # Create a new toast notification app or ensure the Ericsson.Notification is correctly configured
-    $ToastNotificationAppID = "Ericsson.Notification"
-    $ToastNotificationAppDisplayName = "Ericsson Notification"
+    # Create a new toast notification app or ensure the MSEndpointMgr.Notification is correctly configured
+    $ToastNotificationAppID = "MSEndpointMgr.Notification"
+    $ToastNotificationAppDisplayName = "MSEndpointMgr Notification"
     New-ToastNotificationApp -ID $ToastNotificationAppID -DisplayName $AppDisplayName
 
     # Load required image files
@@ -89,13 +89,13 @@ Process {
     $LogoImageFile = Get-ChildItem -Path (Join-Path -Path $PSScriptRoot -ChildPath "LogoImage.png")
 
     # Path to the notification app doing the actual toast
-    $NotificationApplicationName = "Ericsson.Notification"
+    $NotificationApplicationName = "MSEndpointMgr.Notification"
 
     # Define toast notification values
-    $Heading = "MWP-Windows 10 Private Preview"
+    $Heading = "Welcome"
     $HeadingDescription = "Provisioning completed"
-    $PrimaryContent = "Welcome to the MWP-Ericsson Windows 10 private preview program"
-    $SecondaryContent = "Access to legacy resources may be limited until replication has completed (usually between 4-10 hours). You will be notified again once ready."
+    $PrimaryContent = "Welcome to MSEndpointMgr"
+    $SecondaryContent = ""
 
     [xml]$XMLToastContent = @"
         <toast scenario="reminder">
